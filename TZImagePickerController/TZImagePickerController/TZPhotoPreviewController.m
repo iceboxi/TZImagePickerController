@@ -32,6 +32,8 @@
     UILabel *_originalPhotoLabel;
     
     CGFloat _offsetItemCount;
+    
+    TZAssetModel *_lastBrowsedPhoto;
 }
 @property (nonatomic, assign) BOOL isHideNaviBar;
 @property (nonatomic, strong) UIView *cropBgView;
@@ -53,10 +55,11 @@
         _assetsTemp = [NSMutableArray arrayWithArray:_tzImagePickerVc.selectedAssets];
     }
     [self configCollectionView];
+    [self configSelectButton];
     [self configCustomNaviBar];
-    [self configBottomToolBar];
+    
     self.view.clipsToBounds = YES;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
 }
 
 - (void)setPhotos:(NSMutableArray *)photos {
@@ -90,12 +93,40 @@
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     
     _naviBar = [[UIView alloc] initWithFrame:CGRectZero];
-    _naviBar.backgroundColor = [UIColor colorWithRed:(34/255.0) green:(34/255.0)  blue:(34/255.0) alpha:0.7];
+    _naviBar.backgroundColor = [self.navigationController.navigationBar.barTintColor colorWithAlphaComponent:0.7];
     
     _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
     [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
     [_backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(backButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    
+    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _doneButton.titleLabel.font = [UIFont systemFontOfSize:15];
+    [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    [_doneButton setTitle:tzImagePickerVc.doneBtnTitleStr forState:UIControlStateNormal];
+    [_doneButton setTitleColor:self.navigationController.navigationBar.tintColor forState:UIControlStateNormal];
+    
+    _numberImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamedFromMyBundle:tzImagePickerVc.photoNumberIconImageName]];
+    _numberImageView.backgroundColor = [UIColor clearColor];
+    _numberImageView.hidden = tzImagePickerVc.selectedModels.count <= 0;
+    
+    _numberLabel = [[UILabel alloc] init];
+    _numberLabel.font = [UIFont systemFontOfSize:13];
+    _numberLabel.textColor = [UIColor whiteColor];
+    _numberLabel.textAlignment = NSTextAlignmentCenter;
+    _numberLabel.text = [NSString stringWithFormat:@"%zd",tzImagePickerVc.selectedModels.count];
+    _numberLabel.hidden = tzImagePickerVc.selectedModels.count <= 0;
+    _numberLabel.backgroundColor = [UIColor clearColor];
+    
+    [_naviBar addSubview:_backButton];
+    [_naviBar addSubview:_doneButton];
+    [_naviBar addSubview:_numberImageView];
+    [_naviBar addSubview:_numberLabel];
+    [self.view addSubview:_naviBar];
+}
+
+- (void)configSelectButton {
+    TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     
     _selectButton = [[UIButton alloc] initWithFrame:CGRectZero];
     [_selectButton setImage:[UIImage imageNamedFromMyBundle:tzImagePickerVc.photoDefImageName] forState:UIControlStateNormal];
@@ -103,9 +134,7 @@
     [_selectButton addTarget:self action:@selector(select:) forControlEvents:UIControlEventTouchUpInside];
     _selectButton.hidden = !tzImagePickerVc.showSelectBtn;
     
-    [_naviBar addSubview:_selectButton];
-    [_naviBar addSubview:_backButton];
-    [self.view addSubview:_naviBar];
+    [self.view addSubview:_selectButton];
 }
 
 - (void)configBottomToolBar {
@@ -217,13 +246,13 @@
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     TZImagePickerController *_tzImagePickerVc = (TZImagePickerController *)self.navigationController;
-
+    
     CGFloat statusBarHeight = [TZCommonTools tz_statusBarHeight];
-    CGFloat statusBarHeightInterval = statusBarHeight - 20;
-    CGFloat naviBarHeight = statusBarHeight + _tzImagePickerVc.navigationBar.tz_height;
-    _naviBar.frame = CGRectMake(0, 0, self.view.tz_width, naviBarHeight);
-    _backButton.frame = CGRectMake(10, 10 + statusBarHeightInterval, 44, 44);
-    _selectButton.frame = CGRectMake(self.view.tz_width - 54, 10 + statusBarHeightInterval, 42, 42);
+    CGFloat naviBarHeight = _tzImagePickerVc.navigationBar.tz_height;
+    CGFloat appBarHeight = statusBarHeight + naviBarHeight;
+    _naviBar.frame = CGRectMake(0, 0, self.view.tz_width, appBarHeight);
+    _backButton.frame = CGRectMake(-7, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
+    _selectButton.frame = CGRectMake(self.view.tz_width - 42 - 10, appBarHeight + 10, 42, 42);
     
     _layout.itemSize = CGSizeMake(self.view.tz_width + 20, self.view.tz_height);
     _layout.minimumInteritemSpacing = 0;
@@ -247,8 +276,8 @@
         _originalPhotoLabel.frame = CGRectMake(fullImageWidth + 42, 0, 80, 44);
     }
     [_doneButton sizeToFit];
-    _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 12, 0, _doneButton.tz_width, toolBarHeight);
-    _numberImageView.frame = CGRectMake(_doneButton.tz_left - 30 - 2, (toolBarHeight - 30) / 2, 30, 30);
+    _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 17, statusBarHeight + (naviBarHeight - 44)/2, _doneButton.tz_width, 44);
+    _numberImageView.frame = CGRectMake(_doneButton.tz_left - 30, statusBarHeight + (naviBarHeight - 25)/2, 25, 25);
     _numberLabel.frame = _numberImageView.frame;
     
     [self configCropView];
@@ -319,6 +348,7 @@
         [UIView showOscillatoryAnimationWithLayer:selectButton.imageView.layer type:TZOscillatoryAnimationToBigger];
     }
     [UIView showOscillatoryAnimationWithLayer:_numberImageView.layer type:TZOscillatoryAnimationToSmaller];
+    [UIView showOscillatoryAnimationWithLayer:_numberLabel.layer type:TZOscillatoryAnimationToSmaller];
 }
 
 - (void)backButtonClick {
@@ -328,7 +358,7 @@
     }
     [self.navigationController popViewControllerAnimated:YES];
     if (self.backButtonClickBlock) {
-        self.backButtonClickBlock(_isSelectOriginalPhoto);
+        self.backButtonClickBlock(_isSelectOriginalPhoto, _lastBrowsedPhoto);
     }
 }
 
@@ -382,8 +412,28 @@
 
 - (void)didTapPreviewCell {
     self.isHideNaviBar = !self.isHideNaviBar;
-    _naviBar.hidden = self.isHideNaviBar;
     _toolBar.hidden = self.isHideNaviBar;
+    
+    if (self.isHideNaviBar) {
+        [UIView animateWithDuration:0.2
+                         animations:^{
+                             _selectButton.alpha = 0.0;
+                             _naviBar.alpha = 0.0;
+                         }
+                         completion:^(BOOL finished){
+                             _selectButton.hidden = true;
+                             _naviBar.hidden = true;
+                         }];
+    } else {
+        _selectButton.hidden = false;
+        _naviBar.hidden = false;
+        [UIView animateWithDuration:0.3
+                         animations:^{
+                             _selectButton.alpha = 1.0;
+                             _naviBar.alpha = 1.0;
+                         }];
+    }
+    
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -452,6 +502,9 @@
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    TZAssetModel *model = _models[indexPath.row];
+    _lastBrowsedPhoto = model;
+    
     if ([cell isKindOfClass:[TZPhotoPreviewCell class]]) {
         [(TZPhotoPreviewCell *)cell recoverSubviews];
     }
@@ -515,3 +568,4 @@
 }
 
 @end
+

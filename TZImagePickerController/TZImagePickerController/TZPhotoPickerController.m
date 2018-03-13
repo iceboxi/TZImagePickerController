@@ -20,6 +20,10 @@
 @interface TZPhotoPickerController ()<UICollectionViewDataSource,UICollectionViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate,UIAlertViewDelegate> {
     NSMutableArray *_models;
     
+    UIView *_naviBar;
+    UILabel *_titleLabel;
+    UIButton *_backButton;
+    
     UIView *_bottomToolBar;
     UIButton *_previewButton;
     UIButton *_doneButton;
@@ -36,6 +40,7 @@
 }
 @property CGRect previousPreheatRect;
 @property (nonatomic, assign) BOOL isSelectOriginalPhoto;
+@property (nullable, assign) TZAssetModel *lastBrowsedPhoto;
 @property (nonatomic, strong) TZCollectionView *collectionView;
 @property (strong, nonatomic) UICollectionViewFlowLayout *layout;
 @property (nonatomic, strong) UIImagePickerController *imagePickerVc;
@@ -78,15 +83,7 @@ static CGFloat itemMargin = 5;
     _isSelectOriginalPhoto = tzImagePickerVc.isSelectOriginalPhoto;
     _shouldScrollToBottom = YES;
     self.view.backgroundColor = [UIColor whiteColor];
-    self.navigationItem.title = _model.name;
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:tzImagePickerVc.cancelBtnTitleStr style:UIBarButtonItemStylePlain target:tzImagePickerVc action:@selector(cancelButtonClick)];
-    if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
-        UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        leftButton.frame = CGRectMake(0, 0, 44, 44);
-        [leftButton addTarget:self action:@selector(navLeftBarButtonClick) forControlEvents:UIControlEventTouchUpInside];
-        tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
-        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
-    }
+    
     _showTakePhotoBtn = (_model.isCameraRoll && tzImagePickerVc.allowTakePicture);
     // [self resetCachedAssets];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
@@ -126,7 +123,7 @@ static CGFloat itemMargin = 5;
         [self checkSelectedModels];
         [self configCollectionView];
         _collectionView.hidden = YES;
-        [self configBottomToolBar];
+        [self configCustomNaviBar];
         
         [self scrollCollectionViewToBottom];
     });
@@ -163,8 +160,51 @@ static CGFloat itemMargin = 5;
     [_collectionView registerClass:[TZAssetCameraCell class] forCellWithReuseIdentifier:@"TZAssetCameraCell"];
 }
 
+- (void)configCustomNaviBar {
+    TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    
+    _naviBar = [[UIView alloc] initWithFrame:CGRectZero];
+    _naviBar.backgroundColor = self.navigationController.navigationBar.barTintColor;
+    
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _titleLabel.font = [UIFont boldSystemFontOfSize:17];
+    _titleLabel.text = @"選擇相片"; //_model.name
+    _titleLabel.textColor = self.navigationController.navigationBar.tintColor;
+    
+    _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
+    [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
+    [_backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_backButton addTarget:self action:@selector(backButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    
+    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _doneButton.titleLabel.font = [UIFont systemFontOfSize:15];
+    [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    [_doneButton setTitle:tzImagePickerVc.doneBtnTitleStr forState:UIControlStateNormal];
+    [_doneButton setTitleColor:self.navigationController.navigationBar.tintColor forState:UIControlStateNormal];
+    
+    _numberImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamedFromMyBundle:tzImagePickerVc.photoNumberIconImageName]];
+    _numberImageView.backgroundColor = [UIColor clearColor];
+    _numberImageView.hidden = tzImagePickerVc.selectedModels.count <= 0;
+    
+    _numberLabel = [[UILabel alloc] init];
+    _numberLabel.font = [UIFont systemFontOfSize:13];
+    _numberLabel.textColor = [UIColor whiteColor];
+    _numberLabel.textAlignment = NSTextAlignmentCenter;
+    _numberLabel.text = [NSString stringWithFormat:@"%zd",tzImagePickerVc.selectedModels.count];
+    _numberLabel.hidden = tzImagePickerVc.selectedModels.count <= 0;
+    _numberLabel.backgroundColor = [UIColor clearColor];
+    
+    [_naviBar addSubview:_titleLabel];
+    [_naviBar addSubview:_backButton];
+    [_naviBar addSubview:_doneButton];
+    [_naviBar addSubview:_numberImageView];
+    [_naviBar addSubview:_numberLabel];
+    [self.view addSubview:_naviBar];
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
     // Determine the size of the thumbnails to request from the PHCachingImageManager
     CGFloat scale = 2.0;
     if ([UIScreen mainScreen].bounds.size.width > 600) {
@@ -188,11 +228,11 @@ static CGFloat itemMargin = 5;
 - (void)configBottomToolBar {
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     if (!tzImagePickerVc.showSelectBtn) return;
-
+    
     _bottomToolBar = [[UIView alloc] initWithFrame:CGRectZero];
     CGFloat rgb = 253 / 255.0;
     _bottomToolBar.backgroundColor = [UIColor colorWithRed:rgb green:rgb blue:rgb alpha:1.0];
-
+    
     _previewButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_previewButton addTarget:self action:@selector(previewButtonClick) forControlEvents:UIControlEventTouchUpInside];
     _previewButton.titleLabel.font = [UIFont systemFontOfSize:16];
@@ -262,21 +302,36 @@ static CGFloat itemMargin = 5;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-
+    
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     
     CGFloat top = 0;
     CGFloat collectionViewHeight = 0;
-    CGFloat naviBarHeight = self.navigationController.navigationBar.tz_height;
+    CGFloat naviBarHeight = tzImagePickerVc.navigationBar.tz_height;
+    CGFloat statusBarHeight = [TZCommonTools tz_statusBarHeight];
     BOOL isStatusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
     CGFloat toolBarHeight = [TZCommonTools tz_isIPhoneX] ? 50 + (83 - 49) : 50;
     if (self.navigationController.navigationBar.isTranslucent) {
         top = naviBarHeight;
-        if (iOS7Later && !isStatusBarHidden) top += [TZCommonTools tz_statusBarHeight];
-        collectionViewHeight = tzImagePickerVc.showSelectBtn ? self.view.tz_height - toolBarHeight - top : self.view.tz_height - top;;
+        if (iOS7Later && !isStatusBarHidden) top += statusBarHeight;
+        collectionViewHeight = tzImagePickerVc.showSelectBtn ? self.view.tz_height - top : self.view.tz_height - top;;
     } else {
-        collectionViewHeight = tzImagePickerVc.showSelectBtn ? self.view.tz_height - toolBarHeight : self.view.tz_height;
+        collectionViewHeight = tzImagePickerVc.showSelectBtn ? self.view.tz_height : self.view.tz_height;
     }
+    
+    _naviBar.frame = CGRectMake(0, 0, self.view.tz_width, naviBarHeight + statusBarHeight);
+    _backButton.frame = CGRectMake(-7, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
+    
+    [_titleLabel sizeToFit];
+    CGPoint titleLabelOrigin = CGPointMake((self.view.tz_width - _titleLabel.frame.size.width)/2, statusBarHeight + (naviBarHeight - _titleLabel.frame.size.height)/2);
+    _titleLabel.tz_origin = titleLabelOrigin;
+    
+    
+    [_doneButton sizeToFit];
+    _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 17, statusBarHeight + (naviBarHeight - 44)/2, _doneButton.tz_width, 44);
+    _numberImageView.frame = CGRectMake(_doneButton.tz_left - 30, statusBarHeight + (naviBarHeight - 25)/2, 25, 25);
+    _numberLabel.frame = _numberImageView.frame;
+    
     _collectionView.frame = CGRectMake(0, top, self.view.tz_width, collectionViewHeight);
     CGFloat itemWH = (self.view.tz_width - (self.columnNumber + 1) * itemMargin) / self.columnNumber;
     _layout.itemSize = CGSizeMake(itemWH, itemWH);
@@ -308,10 +363,6 @@ static CGFloat itemMargin = 5;
         _originalPhotoButton.frame = CGRectMake(CGRectGetMaxX(_previewButton.frame), 0, fullImageWidth + 56, 50);
         _originalPhotoLabel.frame = CGRectMake(fullImageWidth + 46, 0, 80, 50);
     }
-    [_doneButton sizeToFit];
-    _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 12, 0, _doneButton.tz_width, toolBarHeight);
-    _numberImageView.frame = CGRectMake(_doneButton.tz_left - 30 - 2, (toolBarHeight - 30) / 2, 30, 30);
-    _numberLabel.frame = _numberImageView.frame;
     _divideLine.frame = CGRectMake(0, 0, self.view.tz_width, 1);
     
     [TZImageManager manager].columnNumber = [TZImageManager manager].columnNumber;
@@ -325,9 +376,6 @@ static CGFloat itemMargin = 5;
 }
 
 #pragma mark - Click Event
-- (void)navLeftBarButtonClick{
-    [self.navigationController popViewControllerAnimated:YES];
-}
 - (void)previewButtonClick {
     TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
     [self pushPhotoPrevireViewController:photoPreviewVc];
@@ -340,6 +388,11 @@ static CGFloat itemMargin = 5;
     if (_isSelectOriginalPhoto) {
         [self getSelectedPhotoBytes];
     }
+}
+
+- (void)backButtonClick {
+    [self.navigationController setNavigationBarHidden:NO animated:NO];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)doneButtonClick {
@@ -469,13 +522,21 @@ static CGFloat itemMargin = 5;
     cell.showSelectBtn = tzImagePickerVc.showSelectBtn;
     cell.allowPreview = tzImagePickerVc.allowPreview;
     
+    if (_lastBrowsedPhoto == model) {
+        [cell setSelected:YES];
+    } else {
+        [cell setSelected:NO];
+    }
+    
     __weak typeof(cell) weakCell = cell;
     __weak typeof(self) weakSelf = self;
-    __weak typeof(_numberImageView.layer) weakLayer = _numberImageView.layer;
+    __weak typeof(_numberImageView.layer) weakNumberImageViewLayer = _numberImageView.layer;
+    __weak typeof(_numberLabel.layer) weakNumberLabelLayer = _numberLabel.layer;
     cell.didSelectPhotoBlock = ^(BOOL isSelected) {
         __strong typeof(weakCell) strongCell = weakCell;
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        __strong typeof(weakLayer) strongLayer = weakLayer;
+        __strong typeof(weakNumberLabelLayer) strongNumberLabelLayer = weakNumberLabelLayer;
+        __strong typeof(weakNumberImageViewLayer) strongNumberImageViewLayer = weakNumberImageViewLayer;
         TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)strongSelf.navigationController;
         // 1. cancel select / 取消选择
         if (isSelected) {
@@ -501,7 +562,9 @@ static CGFloat itemMargin = 5;
                 [tzImagePickerVc showAlertWithTitle:title];
             }
         }
-        [UIView showOscillatoryAnimationWithLayer:strongLayer type:TZOscillatoryAnimationToSmaller];
+        [UIView showOscillatoryAnimationWithLayer:strongNumberImageViewLayer type:TZOscillatoryAnimationToSmaller];
+        [UIView showOscillatoryAnimationWithLayer:strongNumberLabelLayer type:TZOscillatoryAnimationToSmaller];
+        
     };
     return cell;
 }
@@ -633,8 +696,9 @@ static CGFloat itemMargin = 5;
 - (void)pushPhotoPrevireViewController:(TZPhotoPreviewController *)photoPreviewVc {
     __weak typeof(self) weakSelf = self;
     photoPreviewVc.isSelectOriginalPhoto = _isSelectOriginalPhoto;
-    [photoPreviewVc setBackButtonClickBlock:^(BOOL isSelectOriginalPhoto) {
+    [photoPreviewVc setBackButtonClickBlock:^(BOOL isSelectOriginalPhoto, TZAssetModel *lastBrowsedPhoto) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
+        strongSelf.lastBrowsedPhoto = lastBrowsedPhoto;
         strongSelf.isSelectOriginalPhoto = isSelectOriginalPhoto;
         [strongSelf.collectionView reloadData];
         [strongSelf refreshBottomToolBarStatus];
@@ -908,3 +972,4 @@ static CGFloat itemMargin = 5;
 }
 
 @end
+

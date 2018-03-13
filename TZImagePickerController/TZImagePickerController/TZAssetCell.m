@@ -26,6 +26,17 @@
 
 @implementation TZAssetCell
 
+- (void)setSelected:(BOOL)selected {
+    [super setSelected:selected];
+    if (selected) {
+        self.layer.borderWidth = 2.5;
+        self.layer.borderColor = [UIColor colorWithRed:1.0 green:(156/255.0) blue:0.0 alpha:1.0].CGColor;
+    }
+    else {
+        self.layer.borderWidth = 0.0;
+    }
+}
+
 - (void)setModel:(TZAssetModel *)model {
     _model = model;
     if (iOS8Later) {
@@ -57,6 +68,12 @@
     self.imageRequestID = imageRequestID;
     self.selectPhotoButton.selected = model.isSelected;
     self.selectImageView.image = self.selectPhotoButton.isSelected ? [UIImage imageNamedFromMyBundle:self.photoSelImageName] : [UIImage imageNamedFromMyBundle:self.photoDefImageName];
+    if (self.isSelected || self.isHighlighted) {
+        self.layer.borderWidth = 2.5;
+        self.layer.borderColor = [UIColor colorWithRed:1.0 green:(156/255.0) blue:0.0 alpha:1.0].CGColor;
+    } else {
+        self.layer.borderWidth = 0;
+    }
     self.type = (NSInteger)model.type;
     // 让宽度/高度小于 最小可选照片尺寸 的图片不能选中
     if (![[TZImageManager manager] isPhotoSelectableWithAsset:model.asset]) {
@@ -235,7 +252,7 @@
     } else {
         _selectPhotoButton.frame = self.bounds;
     }
-    _selectImageView.frame = CGRectMake(self.tz_width - 27, 0, 27, 27);
+    _selectImageView.frame = CGRectMake(self.tz_width - 22 - 8, 8, 22, 22);
     _imageView.frame = CGRectMake(0, 0, self.tz_width, self.tz_height);
     
     static CGFloat progressWH = 20;
