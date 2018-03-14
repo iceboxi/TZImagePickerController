@@ -61,8 +61,8 @@
     self.oKButtonTitleColorDisabled = [UIColor colorWithRed:(83/255.0) green:(179/255.0) blue:(17/255.0) alpha:0.5];
     
     if (iOS7Later) {
-        self.navigationBar.barTintColor = [UIColor colorWithRed:(34/255.0) green:(34/255.0)  blue:(34/255.0) alpha:1.0];
-        self.navigationBar.tintColor = [UIColor whiteColor];
+        self.navigationBar.barTintColor = [[UINavigationBar appearance] barTintColor];
+        self.navigationBar.tintColor = [[UINavigationBar appearance] tintColor];
         self.automaticallyAdjustsScrollViewInsets = NO;
         if (self.needShowStatusBar) [UIApplication sharedApplication].statusBarHidden = NO;
     }
@@ -70,8 +70,12 @@
 
 - (void)setNaviBgColor:(UIColor *)naviBgColor {
     _naviBgColor = naviBgColor;
+    [self configNaviBgAppearance];
+}
+
+- (void)configNaviBgAppearance {
     if (iOS7Later) {
-        self.navigationBar.barTintColor = naviBgColor;
+        self.navigationBar.barTintColor = self.naviBgColor;
     }
 }
 
@@ -124,9 +128,10 @@
         barItem = [UIBarButtonItem appearanceWhenContainedIn:[TZImagePickerController class], nil];
     }
     NSMutableDictionary *textAttrs = [NSMutableDictionary dictionary];
-    textAttrs[NSForegroundColorAttributeName] = self.barItemTextColor;
     textAttrs[NSFontAttributeName] = self.barItemTextFont;
     [barItem setTitleTextAttributes:textAttrs forState:UIControlStateNormal];
+    [barItem setTitleTextAttributes:textAttrs forState:UIControlStateHighlighted];
+    self.navigationBar.tintColor = self.barItemTextColor;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -139,6 +144,18 @@
     [super viewWillDisappear:animated];
     [UIApplication sharedApplication].statusBarStyle = _originStatusBarStyle;
     [self hideProgressHUD];
+}
+
+-(BOOL)shouldAutorotate {
+    return NO;
+}
+
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
+}
+
+-(UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationPortrait;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
@@ -265,12 +282,13 @@
     self.timeout = 15;
     self.photoWidth = 828.0;
     self.photoPreviewMaxWidth = 600;
-    self.naviTitleColor = [UIColor whiteColor];
-    self.naviTitleFont = [UIFont systemFontOfSize:17];
+    self.naviBgColor = [[UINavigationBar appearance] barTintColor];
+    self.naviTitleColor = [[UINavigationBar appearance] tintColor];
+    self.naviTitleFont = [UIFont boldSystemFontOfSize:17];
     self.barItemTextFont = [UIFont systemFontOfSize:15];
-    self.barItemTextColor = [UIColor whiteColor];
+    self.barItemTextColor = [[UINavigationBar appearance] tintColor];
     self.allowPreview = YES;
-    self.statusBarStyle = UIStatusBarStyleLightContent;
+    self.statusBarStyle = UIStatusBarStyleDefault;
     
     [self configDefaultImageName];
     [self configDefaultBtnTitle];
@@ -633,11 +651,7 @@
     [super viewWillAppear:animated];
     TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
     [imagePickerVc hideProgressHUD];
-    if (imagePickerVc.allowTakePicture) {
-        self.navigationItem.title = [NSBundle tz_localizedStringForKey:@"Photos"];
-    } else if (imagePickerVc.allowPickingVideo) {
-        self.navigationItem.title = [NSBundle tz_localizedStringForKey:@"Videos"];
-    }
+    self.title = @"相簿";
     
     if (self.isFirstAppear && !imagePickerVc.navLeftBarButtonSettingBlock) {
         self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
@@ -719,7 +733,8 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     TZAlbumCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TZAlbumCell"];
     TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-    cell.selectedCountButton.backgroundColor = imagePickerVc.oKButtonTitleColorNormal;
+    [cell.selectedCountButton setBackgroundImage:[UIImage imageNamedFromMyBundle:imagePickerVc.photoNumberIconImageName] forState:UIControlStateNormal];
+    cell.selectedCountButton.backgroundColor = [UIColor clearColor];
     cell.model = _albumArr[indexPath.row];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     return cell;

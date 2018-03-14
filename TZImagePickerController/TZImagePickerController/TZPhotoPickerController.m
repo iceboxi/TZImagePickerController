@@ -139,6 +139,18 @@ static CGFloat itemMargin = 5;
     return NO;
 }
 
+-(BOOL)shouldAutorotate {
+    return NO;
+}
+
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
+}
+
+-(UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationPortrait;
+}
+
 - (void)configCollectionView {
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     
@@ -162,6 +174,7 @@ static CGFloat itemMargin = 5;
 
 - (void)configCustomNaviBar {
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    UIColor *tintColor = self.navigationController.navigationBar.titleTextAttributes[NSForegroundColorAttributeName];
     
     _naviBar = [[UIView alloc] initWithFrame:CGRectZero];
     _naviBar.backgroundColor = self.navigationController.navigationBar.barTintColor;
@@ -169,7 +182,7 @@ static CGFloat itemMargin = 5;
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _titleLabel.font = [UIFont boldSystemFontOfSize:17];
     _titleLabel.text = @"選擇相片"; //_model.name
-    _titleLabel.textColor = self.navigationController.navigationBar.tintColor;
+    _titleLabel.textColor = tintColor;
     
     _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
     [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
@@ -180,7 +193,8 @@ static CGFloat itemMargin = 5;
     _doneButton.titleLabel.font = [UIFont systemFontOfSize:15];
     [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [_doneButton setTitle:tzImagePickerVc.doneBtnTitleStr forState:UIControlStateNormal];
-    [_doneButton setTitleColor:self.navigationController.navigationBar.tintColor forState:UIControlStateNormal];
+    [_doneButton setTitleColor:tintColor forState:UIControlStateNormal];
+    [_doneButton setTitleColor:[tintColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
     
     _numberImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamedFromMyBundle:tzImagePickerVc.photoNumberIconImageName]];
     _numberImageView.backgroundColor = [UIColor clearColor];
@@ -329,7 +343,7 @@ static CGFloat itemMargin = 5;
     
     [_doneButton sizeToFit];
     _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 17, statusBarHeight + (naviBarHeight - 44)/2, _doneButton.tz_width, 44);
-    _numberImageView.frame = CGRectMake(_doneButton.tz_left - 30, statusBarHeight + (naviBarHeight - 25)/2, 25, 25);
+    _numberImageView.frame = CGRectMake(_doneButton.tz_left - 30, statusBarHeight + (naviBarHeight - 22)/2, 22, 22);
     _numberLabel.frame = _numberImageView.frame;
     
     _collectionView.frame = CGRectMake(0, top, self.view.tz_width, collectionViewHeight);
