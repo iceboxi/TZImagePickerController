@@ -89,14 +89,18 @@ static CGFloat itemMargin = 5;
     self.navigationItem.rightBarButtonItem = doneButton;
     if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
         UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        leftButton.frame = CGRectMake(0, 0, 44, 44);
+        leftButton.frame = CGRectMake(0, 0, 50, 44);
         [leftButton addTarget:tzImagePickerVc action:@selector(cancelButtonClick) forControlEvents:UIControlEventTouchUpInside];
         tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
     } else {
-        UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedFromMyBundle:@"navi_back"] style:UIBarButtonItemStylePlain target:nil action:@selector(cancelButtonClick)];
-        backButton.imageInsets = UIEdgeInsetsMake(-1, 0, -8, 0);
-        self.navigationItem.leftBarButtonItem = backButton;
+        UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        backButton.frame = CGRectMake(0, 0, 50, 44);
+        [backButton addTarget:tzImagePickerVc action:@selector(cancelButtonClick) forControlEvents:UIControlEventTouchUpInside];
+        [backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:normal];
+        [backButton setImageEdgeInsets:UIEdgeInsetsMake(1, 0, 0, 8)];
+        [backButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     }
     _showTakePhotoBtn = _model.isCameraRoll && ((tzImagePickerVc.allowTakePicture && tzImagePickerVc.allowPickingImage) || (tzImagePickerVc.allowTakeVideo && tzImagePickerVc.allowPickingVideo));
     // [self resetCachedAssets];
@@ -168,7 +172,7 @@ static CGFloat itemMargin = 5;
 - (void)configCollectionView {
     _layout = [[UICollectionViewFlowLayout alloc] init];
     _collectionView = [[TZCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:_layout];
-    _collectionView.backgroundColor = [UIColor whiteColor];
+    _collectionView.backgroundColor = [UIColor colorWithRed:249/255.0 green:249/255.0 blue:249/255.0 alpha:1];
     _collectionView.dataSource = self;
     _collectionView.delegate = self;
     _collectionView.alwaysBounceHorizontal = NO;

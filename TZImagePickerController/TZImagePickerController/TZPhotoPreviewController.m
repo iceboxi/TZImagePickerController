@@ -105,18 +105,22 @@
     _navTitleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _navTitleLabel.font = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     _navTitleLabel.text = [NSString stringWithFormat:@"%lu/%lu", (unsigned long)self.currentIndex, (unsigned long)self.models.count - 1];
-    _navTitleLabel.textColor = self.navigationController.navigationBar.tintColor;
+    _navTitleLabel.textColor = tzImagePickerVc.naviTitleColor;
     
     _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
-    [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
-    [_backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(backButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
+        tzImagePickerVc.navLeftBarButtonSettingBlock(_backButton);
+    } else {
+        [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
+        [_backButton setTitleColor:tzImagePickerVc.naviTitleColor forState:UIControlStateNormal];
+    }
     
     _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
     _doneButton.titleLabel.font = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [_doneButton setTitle:@"選擇" forState:UIControlStateNormal];
-    [_doneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_doneButton setTitleColor:tzImagePickerVc.naviTitleColor forState:UIControlStateNormal];
     
     [_naviBar addSubview:_navTitleLabel];
     [_naviBar addSubview:_backButton];
@@ -193,7 +197,7 @@
     _layout = [[UICollectionViewFlowLayout alloc] init];
     _layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:_layout];
-    _collectionView.backgroundColor = [UIColor blackColor];
+    _collectionView.backgroundColor = [UIColor colorWithRed:249/255.0 green:249/255.0 blue:249/255.0 alpha:1];
     _collectionView.dataSource = self;
     _collectionView.delegate = self;
     _collectionView.pagingEnabled = YES;
@@ -254,7 +258,7 @@
     CGPoint titleLabelOrigin = CGPointMake((self.view.tz_width - _navTitleLabel.frame.size.width)/2, statusBarHeight + (naviBarHeight - _navTitleLabel.frame.size.height)/2);
     _navTitleLabel.tz_origin = titleLabelOrigin;
     
-    _backButton.frame = CGRectMake(-5, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
+    _backButton.frame = CGRectMake(8, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
     _selectPhotoButton.frame = CGRectMake(self.view.tz_width - 42 - 10, appBarHeight + 10, 42, 42);
     _selectView.frame = CGRectMake(self.view.tz_width - 30 - 15, appBarHeight + 15, 30, 30);
     _selectView.layer.cornerRadius = 15;

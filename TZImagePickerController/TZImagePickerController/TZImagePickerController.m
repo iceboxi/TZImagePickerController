@@ -285,7 +285,7 @@
     self.barItemTextColor = [[UINavigationBar appearance] tintColor];
     self.allowPreview = YES;
     self.notScaleImage = NO;
-    self.statusBarStyle = UIStatusBarStyleLightContent;
+    self.statusBarStyle = UIStatusBarStyleDefault;
     self.cannotSelectLayerColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
     self.allowCameraLocation = YES;
     
