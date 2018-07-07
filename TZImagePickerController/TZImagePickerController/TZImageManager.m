@@ -686,7 +686,7 @@ static dispatch_once_t onceToken;
 - (void)savePhotoWithImage:(UIImage *)image location:(CLLocation *)location completion:(void (^)(NSError *error))completion {
     if (iOS8Later) {
         [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-            if (iOS9Later) {
+            if (@available(iOS 9.0, *)) {
                 NSData *data = UIImageJPEGRepresentation(image, 0.9);
                 PHAssetResourceCreationOptions *options = [[PHAssetResourceCreationOptions alloc] init];
                 options.shouldMoveFile = YES;
@@ -743,7 +743,7 @@ static dispatch_once_t onceToken;
 - (void)saveVideoWithUrl:(NSURL *)url location:(CLLocation *)location completion:(void (^)(NSError *error))completion {
     if (iOS8Later) {
         [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-            if (iOS9Later) {
+            if (@available(iOS 9.0, *)) {
                 PHAssetResourceCreationOptions *options = [[PHAssetResourceCreationOptions alloc] init];
                 options.shouldMoveFile = YES;
                 PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];

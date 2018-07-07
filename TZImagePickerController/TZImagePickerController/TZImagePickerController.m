@@ -70,12 +70,8 @@
 
 - (void)setNaviBgColor:(UIColor *)naviBgColor {
     _naviBgColor = naviBgColor;
-    [self configNaviBgAppearance];
-}
-
-- (void)configNaviBgAppearance {
     if (iOS7Later) {
-        self.navigationBar.barTintColor = self.naviBgColor;
+        self.navigationBar.barTintColor = naviBgColor;
     }
 }
 
@@ -122,16 +118,15 @@
 
 - (void)configBarButtonItemAppearance {
     UIBarButtonItem *barItem;
-    if (iOS9Later) {
+    if (@available(iOS 9.0, *)) {
         barItem = [UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[TZImagePickerController class]]];
     } else {
         barItem = [UIBarButtonItem appearanceWhenContainedIn:[TZImagePickerController class], nil];
     }
     NSMutableDictionary *textAttrs = [NSMutableDictionary dictionary];
+    textAttrs[NSForegroundColorAttributeName] = self.barItemTextColor;
     textAttrs[NSFontAttributeName] = self.barItemTextFont;
     [barItem setTitleTextAttributes:textAttrs forState:UIControlStateNormal];
-    [barItem setTitleTextAttributes:textAttrs forState:UIControlStateHighlighted];
-    self.navigationBar.tintColor = self.barItemTextColor;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -222,7 +217,6 @@
                 _timer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(observeAuthrizationStatusChange) userInfo:nil repeats:NO];
             }
         } else {
-            albumPickerVc.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
             [self pushPhotoPickerVc];
         }
     }
@@ -286,8 +280,8 @@
     self.photoPreviewMaxWidth = 600;
     self.naviBgColor = [[UINavigationBar appearance] barTintColor];
     self.naviTitleColor = [[UINavigationBar appearance] tintColor];
-    self.naviTitleFont = [UIFont boldSystemFontOfSize:17];
-    self.barItemTextFont = [UIFont systemFontOfSize:15];
+    self.naviTitleFont = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
+    self.barItemTextFont = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     self.barItemTextColor = [[UINavigationBar appearance] tintColor];
     self.allowPreview = YES;
     self.notScaleImage = NO;
@@ -353,8 +347,8 @@
 }
 
 - (void)configDefaultBtnTitle {
-    self.doneBtnTitleStr = [NSBundle tz_localizedStringForKey:@"Done"];
-    self.cancelBtnTitleStr = [NSBundle tz_localizedStringForKey:@"Cancel"];
+    self.doneBtnTitleStr = @"完成"; //[NSBundle tz_localizedStringForKey:@"Done"];
+    self.cancelBtnTitleStr = @"取消"; //[NSBundle tz_localizedStringForKey:@"Cancel"];
     self.previewBtnTitleStr = [NSBundle tz_localizedStringForKey:@"Preview"];
     self.fullImageBtnTitleStr = [NSBundle tz_localizedStringForKey:@"Full image"];
     self.settingBtnTitleStr = [NSBundle tz_localizedStringForKey:@"Setting"];
@@ -624,13 +618,6 @@
     if (iOS7Later) {
         viewController.automaticallyAdjustsScrollViewInsets = NO;
     }
-    UIBarButtonItem *newBackButton =
-    [[UIBarButtonItem alloc]
-     initWithTitle: @" "
-     style: UIBarButtonItemStyleBordered
-     target: nil
-     action: nil];
-    [[self navigationItem] setBackBarButtonItem: newBackButton];
     [super pushViewController:viewController animated:animated];
 }
 
@@ -742,25 +729,21 @@
     self.view.backgroundColor = [UIColor whiteColor];
     
     TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:imagePickerVc.cancelBtnTitleStr style:UIBarButtonItemStylePlain target:imagePickerVc action:@selector(cancelButtonClick)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:imagePickerVc.cancelBtnTitleStr style:UIBarButtonItemStylePlain target:imagePickerVc action:@selector(cancelButtonClick)];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
     [imagePickerVc hideProgressHUD];
-<<<<<<< HEAD
-    self.title = @"相簿";
-=======
     if (imagePickerVc.allowPickingImage) {
         self.navigationItem.title = [NSBundle tz_localizedStringForKey:@"Photos"];
     } else if (imagePickerVc.allowPickingVideo) {
         self.navigationItem.title = [NSBundle tz_localizedStringForKey:@"Videos"];
     }
->>>>>>> 14670c45cc101b94d1f00f8b82277ad4cfdd58d3
     
     if (self.isFirstAppear && !imagePickerVc.navLeftBarButtonSettingBlock) {
-        self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+        self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:[NSBundle tz_localizedStringForKey:@"Back"] style:UIBarButtonItemStylePlain target:nil action:nil];
     }
     
     [self configTableView];
@@ -839,14 +822,9 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     TZAlbumCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TZAlbumCell"];
     TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-<<<<<<< HEAD
-    [cell.selectedCountButton setBackgroundImage:[UIImage imageNamedFromMyBundle:imagePickerVc.photoNumberIconImageName] forState:UIControlStateNormal];
-    cell.selectedCountButton.backgroundColor = [UIColor clearColor];
-=======
     cell.albumCellDidLayoutSubviewsBlock = imagePickerVc.albumCellDidLayoutSubviewsBlock;
     cell.albumCellDidSetModelBlock = imagePickerVc.albumCellDidSetModelBlock;
     cell.selectedCountButton.backgroundColor = imagePickerVc.iconThemeColor;
->>>>>>> 14670c45cc101b94d1f00f8b82277ad4cfdd58d3
     cell.model = _albumArr[indexPath.row];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     return cell;
@@ -980,4 +958,3 @@
 }
 
 @end
-
