@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "TZAssetModel.h"
 
 @interface TZPhotoPreviewController : UIViewController
 
@@ -18,7 +17,7 @@
 @property (nonatomic, assign) BOOL isCropImage;
 
 /// Return the new selected photos / 返回最新的选中图片数组
-@property (nonatomic, copy) void (^backButtonClickBlock)(BOOL isSelectOriginalPhoto, TZAssetModel *lastBrowsedPhoto);
+@property (nonatomic, copy) void (^backButtonClickBlock)(BOOL isSelectOriginalPhoto);
 @property (nonatomic, copy) void (^doneButtonClickBlock)(BOOL isSelectOriginalPhoto);
 @property (nonatomic, copy) void (^doneButtonClickBlockCropMode)(UIImage *cropedImage,id asset);
 @property (nonatomic, copy) void (^doneButtonClickBlockWithPreviewType)(NSArray<UIImage *> *photos,NSArray *assets,BOOL isSelectOriginalPhoto);

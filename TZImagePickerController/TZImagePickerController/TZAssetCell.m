@@ -15,8 +15,8 @@
 
 @interface TZAssetCell ()
 @property (weak, nonatomic) UIImageView *imageView;       // The photo / 照片
-@property (weak, nonatomic) UIImageView *selectImageView;
 @property (weak, nonatomic) UILabel *indexLabel;
+@property (weak, nonatomic) UIView *selectView;
 @property (weak, nonatomic) UIView *bottomView;
 @property (weak, nonatomic) UILabel *timeLength;
 
@@ -26,17 +26,6 @@
 @end
 
 @implementation TZAssetCell
-
-- (void)setSelected:(BOOL)selected {
-    [super setSelected:selected];
-    if (selected) {
-        self.layer.borderWidth = 2.5;
-        self.layer.borderColor = [UIColor colorWithRed:1.0 green:(156/255.0) blue:0.0 alpha:1.0].CGColor;
-    }
-    else {
-        self.layer.borderWidth = 0.0;
-    }
-}
 
 - (void)setModel:(TZAssetModel *)model {
     _model = model;
@@ -74,15 +63,25 @@
         self.imageRequestID = imageRequestID;
     }
     self.selectPhotoButton.selected = model.isSelected;
-    self.selectImageView.image = self.selectPhotoButton.isSelected ? self.photoSelImage : self.photoDefImage;
     self.indexLabel.hidden = !self.selectPhotoButton.isSelected;
+    
+    if (self.selectPhotoButton.isSelected) {
+        self.selectView.backgroundColor = [UIColor colorWithRed:81/255.0 green:204/255.0 blue:146/255.0 alpha:1];
+        self.selectView.layer.cornerRadius = 13;
+        self.selectView.layer.borderWidth = 0;
+    } else {
+        self.selectView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+        self.selectView.layer.cornerRadius = 13;
+        self.selectView.layer.borderWidth = 1;
+        self.selectView.layer.borderColor = [UIColor whiteColor].CGColor;
+    }
     
     self.type = (NSInteger)model.type;
     // 让宽度/高度小于 最小可选照片尺寸 的图片不能选中
     if (![[TZImageManager manager] isPhotoSelectableWithAsset:model.asset]) {
-        if (_selectImageView.hidden == NO) {
+        if (_selectView.hidden == NO) {
             self.selectPhotoButton.hidden = YES;
-            _selectImageView.hidden = YES;
+            _selectView.hidden = YES;
         }
     }
     // 如果用户选中了该图片，提前获取一下大图
@@ -92,13 +91,13 @@
         [self cancelBigImageRequest];
     }
     if (model.needOscillatoryAnimation) {
-        [UIView showOscillatoryAnimationWithLayer:self.selectImageView.layer type:TZOscillatoryAnimationToBigger];
+        [UIView showOscillatoryAnimationWithLayer:self.selectView.layer type:TZOscillatoryAnimationToBigger];
     }
     model.needOscillatoryAnimation = NO;
     [self setNeedsLayout];
     
     if (self.assetCellDidSetModelBlock) {
-        self.assetCellDidSetModelBlock(self, _imageView, _selectImageView, _indexLabel, _bottomView, _timeLength, _videoImgView);
+        self.assetCellDidSetModelBlock(self, _imageView, _selectView, _indexLabel, _bottomView, _timeLength, _videoImgView);
     }
 }
 
@@ -113,19 +112,19 @@
     if (!self.selectPhotoButton.hidden) {
         self.selectPhotoButton.hidden = !showSelectBtn;
     }
-    if (!self.selectImageView.hidden) {
-        self.selectImageView.hidden = !showSelectBtn;
+    if (!self.selectView.hidden) {
+        self.selectView.hidden = !showSelectBtn;
     }
 }
 
 - (void)setType:(TZAssetCellType)type {
     _type = type;
     if (type == TZAssetCellTypePhoto || type == TZAssetCellTypeLivePhoto || (type == TZAssetCellTypePhotoGif && !self.allowPickingGif) || self.allowPickingMultipleVideo) {
-        _selectImageView.hidden = NO;
+        _selectView.hidden = NO;
         _selectPhotoButton.hidden = NO;
         _bottomView.hidden = YES;
     } else { // Video of Gif
-        _selectImageView.hidden = YES;
+        _selectView.hidden = YES;
         _selectPhotoButton.hidden = YES;
     }
     
@@ -148,10 +147,19 @@
     if (self.didSelectPhotoBlock) {
         self.didSelectPhotoBlock(sender.isSelected);
     }
-    self.selectImageView.image = sender.isSelected ? self.photoSelImage : self.photoDefImage;
+    if (self.selectPhotoButton.isSelected) {
+        self.selectView.backgroundColor = [UIColor colorWithRed:81/255.0 green:204/255.0 blue:146/255.0 alpha:1];
+        self.selectView.layer.cornerRadius = self.selectView.tz_height / 2;
+        self.selectView.layer.borderWidth = 0;
+    } else {
+        self.selectView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+        self.selectView.layer.cornerRadius = self.selectView.tz_height / 2;
+        self.selectView.layer.borderWidth = 1;
+        self.selectView.layer.borderColor = [UIColor whiteColor].CGColor;
+    }
     if (sender.isSelected) {
         if (![TZImagePickerConfig sharedInstance].showSelectedIndex && ![TZImagePickerConfig sharedInstance].showPhotoCannotSelectLayer) {
-            [UIView showOscillatoryAnimationWithLayer:_selectImageView.layer type:TZOscillatoryAnimationToBigger];
+            [UIView showOscillatoryAnimationWithLayer:_selectView.layer type:TZOscillatoryAnimationToBigger];
         }
         // 用户选中了该图片，提前获取一下大图
         [self requestBigImage];
@@ -217,19 +225,22 @@
         imageView.clipsToBounds = YES;
         [self.contentView addSubview:imageView];
         _imageView = imageView;
+        
+        [self.contentView bringSubviewToFront:_selectView];
+        [self.contentView bringSubviewToFront:_bottomView];
     }
     return _imageView;
 }
 
-- (UIImageView *)selectImageView {
-    if (_selectImageView == nil) {
-        UIImageView *selectImageView = [[UIImageView alloc] init];
-        selectImageView.contentMode = UIViewContentModeCenter;
-        selectImageView.clipsToBounds = YES;
-        [self.contentView addSubview:selectImageView];
-        _selectImageView = selectImageView;
+
+- (UIView *)selectView {
+    if (_selectView == nil) {
+        UIView *selectView = [[UIView alloc] init];
+        selectView.layer.cornerRadius = selectView.tz_height / 2;
+        [self.contentView addSubview:selectView];
+        _selectView = selectView;
     }
-    return _selectImageView;
+    return _selectView;
 }
 
 - (UIView *)bottomView {
@@ -304,19 +315,14 @@
         _selectPhotoButton.frame = self.bounds;
     }
     
-    _selectImageView.frame = CGRectMake(self.tz_width - 27, 3, 24, 24);
-    if (_selectImageView.image.size.width <= 27) {
-        _selectImageView.contentMode = UIViewContentModeCenter;
-    } else {
-        _selectImageView.contentMode = UIViewContentModeScaleAspectFit;
-    }
-    _indexLabel.frame = _selectImageView.frame;
+    _selectView.frame = CGRectMake(self.tz_width - 31, 5, 26, 26);
+    _indexLabel.frame = _selectView.frame;
     _imageView.frame = CGRectMake(0, 0, self.tz_width, self.tz_height);
     
     static CGFloat progressWH = 20;
     CGFloat progressXY = (self.tz_width - progressWH) / 2;
     _progressView.frame = CGRectMake(progressXY, progressXY, progressWH, progressWH);
-
+    
     _bottomView.frame = CGRectMake(0, self.tz_height - 17, self.tz_width, 17);
     _videoImgView.frame = CGRectMake(8, 0, 17, 17);
     _timeLength.frame = CGRectMake(self.videoImgView.tz_right, 0, self.tz_width - self.videoImgView.tz_right - 5, 17);
@@ -326,12 +332,12 @@
     
     [self.contentView bringSubviewToFront:_bottomView];
     [self.contentView bringSubviewToFront:_cannotSelectLayerButton];
-    [self.contentView bringSubviewToFront:_selectPhotoButton];
-    [self.contentView bringSubviewToFront:_selectImageView];
+    [self.contentView bringSubviewToFront:_selectView];
     [self.contentView bringSubviewToFront:_indexLabel];
+    [self.contentView bringSubviewToFront:_selectPhotoButton];
     
     if (self.assetCellDidLayoutSubviewsBlock) {
-        self.assetCellDidLayoutSubviewsBlock(self, _imageView, _selectImageView, _indexLabel, _bottomView, _timeLength, _videoImgView);
+        self.assetCellDidLayoutSubviewsBlock(self, _imageView, _selectView, _indexLabel, _bottomView, _timeLength, _videoImgView);
     }
 }
 
