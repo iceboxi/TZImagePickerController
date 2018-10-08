@@ -117,15 +117,19 @@
     _navTitleLabel.textColor = self.navigationController.navigationBar.tintColor;
     
     _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
-    [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
-    [_backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(backButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
+        tzImagePickerVc.navLeftBarButtonSettingBlock(_backButton);
+    } else {
+        [_backButton setImage:[UIImage imageNamedFromMyBundle:@"navi_back"] forState:UIControlStateNormal];
+        [_backButton setTitleColor:tzImagePickerVc.naviTitleColor forState:UIControlStateNormal];
+    }
     
     _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
     _doneButton.titleLabel.font = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [_doneButton setTitle:@"選擇" forState:UIControlStateNormal];
-    [_doneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_doneButton setTitleColor:tzImagePickerVc.naviTitleColor forState:UIControlStateNormal];
     
     [_naviBar addSubview:_navTitleLabel];
     [_naviBar addSubview:_backButton];
@@ -263,7 +267,7 @@
     CGPoint titleLabelOrigin = CGPointMake((self.view.tz_width - _navTitleLabel.frame.size.width)/2, statusBarHeight + (naviBarHeight - _navTitleLabel.frame.size.height)/2);
     _navTitleLabel.tz_origin = titleLabelOrigin;
     
-    _backButton.frame = CGRectMake(-5, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
+    _backButton.frame = CGRectMake(10, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
     _selectPhotoButton.frame = CGRectMake(self.view.tz_width - 42 - 10, appBarHeight + 10, 42, 42);
     _selectView.frame = CGRectMake(self.view.tz_width - 30 - 15, appBarHeight + 15, 30, 30);
     _selectView.layer.cornerRadius = 15;
@@ -564,7 +568,7 @@
         _selectView.backgroundColor = [UIColor colorWithRed:81/255.0 green:204/255.0 blue:146/255.0 alpha:1];
         _selectView.layer.borderWidth = 0;
     } else {
-        _selectView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+        _selectView.backgroundColor = [UIColor colorWithRed:189/255.0 green:198/255.0 blue:208/255.0 alpha:0.5];
         _selectView.layer.borderWidth = 1;
         _selectView.layer.borderColor = [UIColor whiteColor].CGColor;
     }

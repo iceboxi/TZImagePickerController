@@ -89,6 +89,7 @@
         textAttrs[NSFontAttributeName] = self.naviTitleFont;
     }
     self.navigationBar.titleTextAttributes = textAttrs;
+    self.navigationBar.tintColor = self.naviTitleColor;
 }
 
 - (void)setBarItemTextFont:(UIFont *)barItemTextFont {
@@ -277,10 +278,12 @@
     self.barItemTextFont = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     self.barItemTextColor = [[UINavigationBar appearance] tintColor];
     self.allowPreview = YES;
+    
     // 2.2.26版本，不主动缩放图片，降低内存占用
     self.notScaleImage = YES;
     self.needFixComposition = NO;
-    self.statusBarStyle = UIStatusBarStyleLightContent;
+    self.statusBarStyle = UIStatusBarStyleDefault;
+    
     self.cannotSelectLayerColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
     self.allowCameraLocation = YES;
     
