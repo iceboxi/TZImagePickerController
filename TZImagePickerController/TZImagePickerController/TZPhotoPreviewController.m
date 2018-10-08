@@ -440,6 +440,8 @@
 }
 
 - (void)didTapPreviewCell {
+    TZImagePickerController *_tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    
     self.isHideNaviBar = !self.isHideNaviBar;
     _toolBar.hidden = self.isHideNaviBar;
     
@@ -456,12 +458,16 @@
                              self->_naviBar.hidden = true;
                          }];
     } else {
-        _selectPhotoButton.hidden = false;
+        if (_tzImagePickerVc.maxImagesCount > 1) {
+            _selectPhotoButton.hidden = false;
+        }
         _selectView.hidden = false;
         _naviBar.hidden = false;
         [UIView animateWithDuration:0.3
                          animations:^{
-                             self->_selectPhotoButton.alpha = 1.0;
+                             if (_tzImagePickerVc.maxImagesCount > 1) {
+                                 self->_selectPhotoButton.alpha = 1.0;
+                             }
                              self->_selectView.alpha = 1.0;
                              self->_naviBar.alpha = 1.0;
                          }];
