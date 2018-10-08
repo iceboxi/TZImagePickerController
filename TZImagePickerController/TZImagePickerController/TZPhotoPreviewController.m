@@ -460,15 +460,15 @@
     } else {
         if (_tzImagePickerVc.maxImagesCount > 1) {
             _selectPhotoButton.hidden = false;
+            _selectView.hidden = false;
         }
-        _selectView.hidden = false;
         _naviBar.hidden = false;
         [UIView animateWithDuration:0.3
                          animations:^{
                              if (_tzImagePickerVc.maxImagesCount > 1) {
                                  self->_selectPhotoButton.alpha = 1.0;
+                                 self->_selectView.alpha = 1.0;
                              }
-                             self->_selectView.alpha = 1.0;
                              self->_naviBar.alpha = 1.0;
                          }];
     }
