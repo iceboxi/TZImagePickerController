@@ -94,6 +94,7 @@
         textAttrs[NSFontAttributeName] = self.naviTitleFont;
     }
     self.navigationBar.titleTextAttributes = textAttrs;
+    self.navigationBar.tintColor = self.naviTitleColor;
 }
 
 - (void)setBarItemTextFont:(UIFont *)barItemTextFont {

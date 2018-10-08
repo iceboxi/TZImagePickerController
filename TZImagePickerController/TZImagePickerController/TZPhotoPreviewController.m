@@ -105,7 +105,7 @@
     _navTitleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _navTitleLabel.font = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     _navTitleLabel.text = [NSString stringWithFormat:@"%lu/%lu", (unsigned long)self.currentIndex, (unsigned long)self.models.count - 1];
-    _navTitleLabel.textColor = tzImagePickerVc.naviTitleColor;
+    _navTitleLabel.textColor = self.navigationController.navigationBar.tintColor;
     
     _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
     [_backButton addTarget:self action:@selector(backButtonClick) forControlEvents:UIControlEventTouchUpInside];
@@ -197,7 +197,7 @@
     _layout = [[UICollectionViewFlowLayout alloc] init];
     _layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:_layout];
-    _collectionView.backgroundColor = [UIColor colorWithRed:249/255.0 green:249/255.0 blue:249/255.0 alpha:1];
+    _collectionView.backgroundColor = [UIColor blackColor];
     _collectionView.dataSource = self;
     _collectionView.delegate = self;
     _collectionView.pagingEnabled = YES;
@@ -258,7 +258,7 @@
     CGPoint titleLabelOrigin = CGPointMake((self.view.tz_width - _navTitleLabel.frame.size.width)/2, statusBarHeight + (naviBarHeight - _navTitleLabel.frame.size.height)/2);
     _navTitleLabel.tz_origin = titleLabelOrigin;
     
-    _backButton.frame = CGRectMake(8, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
+    _backButton.frame = CGRectMake(10, statusBarHeight + (naviBarHeight - 44)/2, 44, 44);
     _selectPhotoButton.frame = CGRectMake(self.view.tz_width - 42 - 10, appBarHeight + 10, 42, 42);
     _selectView.frame = CGRectMake(self.view.tz_width - 30 - 15, appBarHeight + 15, 30, 30);
     _selectView.layer.cornerRadius = 15;
@@ -555,7 +555,7 @@
         _selectView.backgroundColor = [UIColor colorWithRed:81/255.0 green:204/255.0 blue:146/255.0 alpha:1];
         _selectView.layer.borderWidth = 0;
     } else {
-        _selectView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+        _selectView.backgroundColor = [UIColor colorWithRed:189/255.0 green:198/255.0 blue:208/255.0 alpha:0.5];
         _selectView.layer.borderWidth = 1;
         _selectView.layer.borderColor = [UIColor whiteColor].CGColor;
     }

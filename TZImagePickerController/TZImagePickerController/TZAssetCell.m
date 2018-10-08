@@ -70,7 +70,7 @@
         self.selectView.layer.cornerRadius = 13;
         self.selectView.layer.borderWidth = 0;
     } else {
-        self.selectView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+        self.selectView.backgroundColor = [UIColor colorWithRed:189/255.0 green:198/255.0 blue:208/255.0 alpha:0.5];
         self.selectView.layer.cornerRadius = 13;
         self.selectView.layer.borderWidth = 1;
         self.selectView.layer.borderColor = [UIColor whiteColor].CGColor;
@@ -152,7 +152,7 @@
         self.selectView.layer.cornerRadius = self.selectView.tz_height / 2;
         self.selectView.layer.borderWidth = 0;
     } else {
-        self.selectView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+        self.selectView.backgroundColor = [UIColor colorWithRed:189/255.0 green:198/255.0 blue:208/255.0 alpha:0.5];
         self.selectView.layer.cornerRadius = self.selectView.tz_height / 2;
         self.selectView.layer.borderWidth = 1;
         self.selectView.layer.borderColor = [UIColor whiteColor].CGColor;
