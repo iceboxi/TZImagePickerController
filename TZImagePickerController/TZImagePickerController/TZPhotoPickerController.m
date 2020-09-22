@@ -90,7 +90,7 @@ static CGFloat itemMargin = 5;
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:tzImagePickerVc.doneBtnTitleStr style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonClick)];
     [doneButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                                         [UIFont fontWithName:@"PingFangTC-Regular" size:17.0], NSFontAttributeName,
-                                        tzImagePickerVc.naviTitleColor, NSForegroundColorAttributeName, nil] forState:normal];
+                                        tzImagePickerVc.barItemTextColor, NSForegroundColorAttributeName, nil] forState:normal];
     self.navigationItem.rightBarButtonItem = doneButton;
     
     if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
@@ -99,14 +99,18 @@ static CGFloat itemMargin = 5;
         [leftButton addTarget:tzImagePickerVc action:@selector(cancelButtonClick) forControlEvents:UIControlEventTouchUpInside];
         tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
-    } else if (tzImagePickerVc.childViewControllers.count) {
-        [tzImagePickerVc.childViewControllers firstObject].navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+    // } else if (tzImagePickerVc.childViewControllers.count) {
+    //    [tzImagePickerVc.childViewControllers firstObject].navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+        
+    // 越過選擇相簿頁 - RiC.
     } else {
         UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
         backButton.frame = CGRectMake(0, 0, 50, 44);
         [backButton addTarget:tzImagePickerVc action:@selector(cancelButtonClick) forControlEvents:UIControlEventTouchUpInside];
-        [backButton setImage:[UIImage tz_imageNamedFromMyBundle:@"navi_back"] forState:normal];
-        [backButton setImageEdgeInsets:UIEdgeInsetsMake(1, 0, 0, 8)];
+        UIImage *image = [[UIImage tz_imageNamedFromMyBundle:@"navBack"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        [backButton setImage:image forState:normal];
+        [backButton setTintColor:tzImagePickerVc.barItemTextColor];
+        [backButton setImageEdgeInsets:UIEdgeInsetsMake(-1, -8, 0, 0)];
         [backButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     }

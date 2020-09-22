@@ -117,7 +117,7 @@
     _navTitleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _navTitleLabel.font = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     _navTitleLabel.text = [NSString stringWithFormat:@"%lu/%lu", (unsigned long)self.currentIndex, (unsigned long)self.models.count - 1];
-    _navTitleLabel.textColor = self.navigationController.navigationBar.tintColor;
+    _navTitleLabel.textColor = tzImagePickerVc.naviTitleColor;
     
     _backButton = [[UIButton alloc] initWithFrame:CGRectZero];
     
@@ -125,8 +125,9 @@
     if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
         tzImagePickerVc.navLeftBarButtonSettingBlock(_backButton);
     } else {
-        [_backButton setImage:[UIImage tz_imageNamedFromMyBundle:@"navBack"] forState:UIControlStateNormal];
-        [_backButton setTitleColor:tzImagePickerVc.naviTitleColor forState:UIControlStateNormal];
+        [_backButton setImage:[[UIImage tz_imageNamedFromMyBundle:@"navBack"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
+        [_backButton setTintColor:tzImagePickerVc.barItemTextColor];
+        [_backButton setTitleColor:tzImagePickerVc.barItemTextColor forState:UIControlStateNormal];
     }
     
     // 客製化 - RiC.
@@ -134,7 +135,7 @@
     _doneButton.titleLabel.font = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [_doneButton setTitle:@"選擇" forState:UIControlStateNormal];
-    [_doneButton setTitleColor:tzImagePickerVc.naviTitleColor forState:UIControlStateNormal];
+    [_doneButton setTitleColor:tzImagePickerVc.barItemTextColor forState:UIControlStateNormal];
     
     [_naviBar addSubview:_navTitleLabel];
     [_naviBar addSubview:_backButton];

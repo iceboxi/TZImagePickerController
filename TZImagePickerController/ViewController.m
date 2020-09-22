@@ -264,10 +264,10 @@
     // [TZImagePickerConfig sharedInstance].languageBundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"tz-ru" ofType:@"lproj"]];
 
     TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:self.maxCountTF.text.integerValue columnNumber:self.columnNumberTF.text.integerValue delegate:self pushPhotoPickerVc:YES];
-    // imagePickerVc.barItemTextColor = [UIColor blackColor];
+    imagePickerVc.barItemTextColor = [UIColor whiteColor];
     // [imagePickerVc.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor blackColor]}];
-    // imagePickerVc.navigationBar.tintColor = [UIColor blackColor];
-    // imagePickerVc.naviBgColor = [UIColor whiteColor];
+    imagePickerVc.naviBgColor = [UIColor blackColor];
+    imagePickerVc.naviTitleColor = [UIColor blueColor];
     // imagePickerVc.navigationBar.translucent = NO;
     
     

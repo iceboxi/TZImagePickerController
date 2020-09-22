@@ -56,6 +56,9 @@
     self.navigationBar.translucent = YES;
     [TZImageManager manager].shouldFixOrientation = NO;
     
+    self.navigationBar.backIndicatorImage = [[UIImage tz_imageNamedFromMyBundle:@"navBack"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    self.navigationBar.backIndicatorTransitionMaskImage = [[UIImage tz_imageNamedFromMyBundle:@"navBack"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    
     // Default appearance, you can reset these after this method
     // 默认的外观，你可以在这个方法后重置
     self.oKButtonTitleColorNormal   = [UIColor colorWithRed:(83/255.0) green:(179/255.0) blue:(17/255.0) alpha:1.0];
@@ -65,9 +68,6 @@
     self.navigationBar.tintColor = [UIColor colorWithRed:(47/255.0) green:(60/255.0)  blue:(75/255.0) alpha:1.0];
     self.automaticallyAdjustsScrollViewInsets = NO;
     if (self.needShowStatusBar) [UIApplication sharedApplication].statusBarHidden = NO;
-    
-    self.navigationBar.backIndicatorImage = [UIImage tz_imageNamedFromMyBundle:@"navBack"];
-    self.navigationBar.backIndicatorTransitionMaskImage = [UIImage tz_imageNamedFromMyBundle:@"navBack"];
 }
 
 - (void)setNaviBgColor:(UIColor *)naviBgColor {
@@ -94,7 +94,6 @@
         textAttrs[NSFontAttributeName] = self.naviTitleFont;
     }
     self.navigationBar.titleTextAttributes = textAttrs;
-    self.navigationBar.tintColor = self.naviTitleColor;
 }
 
 - (void)setBarItemTextFont:(UIFont *)barItemTextFont {
@@ -128,6 +127,7 @@
     textAttrs[NSForegroundColorAttributeName] = self.barItemTextColor;
     textAttrs[NSFontAttributeName] = self.barItemTextFont;
     [barItem setTitleTextAttributes:textAttrs forState:UIControlStateNormal];
+    self.navigationBar.tintColor = self.barItemTextColor;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -284,11 +284,11 @@
     self.timeout = 15;
     self.photoWidth = 828.0;
     self.photoPreviewMaxWidth = 600;
-    self.naviBgColor = [[UINavigationBar appearance] barTintColor];
-    self.naviTitleColor = [[UINavigationBar appearance] tintColor];
+    self.naviBgColor = [UIColor colorWithRed:(249/255.0) green:(249/255.0)  blue:(249/255.0) alpha:1.0];
+    self.naviTitleColor = [UIColor colorWithRed:(47/255.0) green:(60/255.0)  blue:(75/255.0) alpha:1.0];
     self.naviTitleFont = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
     self.barItemTextFont = [UIFont fontWithName:@"PingFangTC-Regular" size:17];
-    self.barItemTextColor = [[UINavigationBar appearance] tintColor];
+    self.barItemTextColor = [UIColor colorWithRed:(47/255.0) green:(60/255.0)  blue:(75/255.0) alpha:1.0];
     self.allowPreview = YES;
     
     // 2.2.26版本，不主动缩放图片，降低内存占用
