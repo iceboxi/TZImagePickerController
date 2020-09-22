@@ -16,6 +16,10 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    UINavigationBar.appearance.barTintColor = [UIColor colorWithRed:249.0/255.0 green:249.0/255.0 blue:249.0/255.0 alpha:1.0];
+    UINavigationBar.appearance.tintColor = [UIColor colorWithRed:47.0/255.0 green:60.0/255.0 blue:75.0/255.0 alpha:1.0];
+    
     return YES;
 }
 
